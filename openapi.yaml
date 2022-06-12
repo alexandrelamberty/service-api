@@ -1,0 +1,213 @@
+openapi: 3.0.2
+info:
+  title: Services
+  version: '1.0'
+  description: Service deployment
+  contact:
+    name: Alexandre Lamberty
+    url: alexandrelamberty.com
+    email: mail@alexandrelamberty.com
+  license:
+    name: MIT License
+    url: 'https://opensource.org/licenses/MIT'
+servers:
+  - url: 'https://development.services.lan/v1'
+    description: Development server
+  - url: 'https://staging.services.lan/v1'
+    description: Staging server
+  - url: 'https://api.services.lan/v1'
+    description: Production server
+paths:
+  /services:
+    get:
+      summary: Get Services
+      tags:
+        - service
+      responses:
+        '200':
+          $ref: '#/components/responses/ServicesResponse'
+      operationId: get-services
+      description: Get a list of services
+      parameters:
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+    post:
+      summary: Create Service
+      tags:
+        - service
+      operationId: post-services
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceResponse'
+      description: Create a new service
+      requestBody:
+        $ref: '#/components/requestBodies/CreateService'
+  '/services/{serviceId}':
+    parameters:
+      - $ref: '#/components/parameters/serviceId'
+    get:
+      summary: Get Service
+      tags:
+        - service
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceResponse'
+      operationId: get-services-serviceId
+      description: Retrieve a service
+    delete:
+      summary: Delete Service
+      tags:
+        - service
+      operationId: delete-services-serviceId
+      responses:
+        '200':
+          description: OK
+      description: Delete a service
+    patch:
+      summary: Patch Service
+      tags:
+        - service
+      operationId: patch-services-serviceId
+      responses:
+        '200':
+          $ref: '#/components/responses/ServiceResponse'
+      description: Update a service
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateService'
+components:
+  schemas:
+    Service:
+      title: Service
+      type: object
+      description: A service represent an OpenAPI specification to be turned into Docker services
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the given service
+          example: 6009c0eee65f6dce28fb3e50
+        name:
+          type: string
+          description: The name of the service
+          example: Automation Service
+        repository:
+          type: string
+          description: The repository containing the service
+          example: 'https://github.com/user/api-spec'
+        deployed:
+          type: boolean
+          default: false
+          description: Indicate if the service is deployed
+      required:
+        - id
+        - name
+        - deployed
+  requestBodies:
+    CreateService:
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Create new service
+            properties:
+              name:
+                type: string
+                description: The name of the service
+              repository:
+                type: string
+                description: The repository containing the service specification
+          examples: {}
+      description: Create a new service
+    UpdateService:
+      content:
+        application/json:
+          schema:
+            type: object
+            description: Update a service
+            properties:
+              repository:
+                type: string
+                description: Repository containing the service specification
+              deployed:
+                type: boolean
+                description: Indicate if the service is deployed
+      description: Update an existing service
+  responses:
+    ServiceResponse:
+      description: Return service
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Service'
+          examples:
+            A service:
+              value:
+                id: 6009c0eee65f6dce28fb3e50
+                name: Automation Service
+                repository: 'https://github.com/user/api-spec'
+                deployed: false
+    ServicesResponse:
+      description: Return a list of service
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Service'
+          examples:
+            List of services:
+              value:
+                - id: 6009c0eee65f6dce28fb3e50
+                  name: Automation Service
+                  repository: 'https://github.com/user/api-spec'
+                  deployed: false
+                - id: 6009c0eee65f6dce28fb3e50
+                  name: Monnitoring Service
+                  repository: 'https://github.com/user/api-spec'
+                  deployed: false
+                - id: 6009c0eee65f6dce28fb3e50
+                  name: Video Service
+                  repository: 'https://github.com/user/api-spec'
+                  deployed: false
+  parameters:
+    sortBy:
+      name: sortBy
+      in: query
+      required: false
+      schema:
+        type: string
+        example: name
+        enum:
+          - name
+          - id
+      description: Sorting properties
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        example: 50
+        minimum: 1
+      description: Pagination limit of objects to retrieve
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        example: 20
+      description: Pagination offset of objects to retrieve
+    serviceId:
+      name: serviceId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Service unique id
+  examples: {}
+tags:
+  - name: service
+    description: Service deployement
